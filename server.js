@@ -240,8 +240,8 @@ app.get("/Navigation.html", (req, res)=>{
   return res.render("Navigation")
 } )
 
-app.get("/ChangePassword.html", (req, res)=>{
-  return res.render("ChangePassword")
+app.get("/Changepassword.html", (req, res)=>{
+  return res.render("Changepassword")
 } )
 app.get("/Weather.html", (req, res)=>{
   return res.render("Weather")
