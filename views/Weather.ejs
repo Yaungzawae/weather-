@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>四川省自然保护区地理信息查询系统</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            height: 100%;
+            width: 100%;
+            background-color: #2c3e50;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            display: flex;
+            flex-grow: 1;
+        }
+
+        .sidebar {
+            width: 200px;
+            background-color: #34495e;
+            color: white;
+            padding: 20px;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .menu-section {
+            flex-grow: 1;
+        }
+
+        .menu-item {
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .menu-btn {
+            background-color: transparent;
+            color: white;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+            padding: 10px;
+        }
+
+        .submenu {
+            display: none;
+            background-color: #2c3e50;
+            padding-left: 20px;
+            margin-top: 5px;
+            border-left: 2px solid #555;
+        }
+
+        .submenu a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 5px 0;
+        }
+
+        .submenu a:hover {
+            background-color: #555;
+        }
+
+        .menu-item:focus-within .submenu,
+        .menu-item:hover .submenu {
+            display: block;
+        }
+
+        .user-info {
+            margin-bottom: 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .user-info img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .logout-btn {
+            margin-top: 20px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        #avatar-input {
+            display: none;
+        }
+
+        .map-container {
+            flex-grow: 1;
+            margin-left: 200px;
+            height: 100%;
+        }
+
+        #container {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .control-btn {
+            background-color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logo {
+            width: 120px;
+            height: auto;
+            margin: 10px auto 0;
+            cursor: pointer;
+        }
+
+        #infoPanel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: none;
+            z-index: 1000;
+        }
+
+        #infoPanel h2 {
+            margin: 0 0 10px;
+            font-size: 1.5rem;
+            color: #4e73df;
+        }
+
+        #infoPanel div {
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        #infoPanel span {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <nav class="sidebar">
+            <div class="menu-section">
+                <header>
+                    <img id="user-avatar" src="default-avatar.png" alt="用户头像" title="点击更换头像">
+                    <input type="file" id="avatar-input" accept="image/*">
+                    <div class="user-info">
+                        <strong id="username">未登录</strong>
+                    </div>
+                    <button class="logout-btn" id="logoutButton">登出</button>
+                </header>
+                <div class="menu-item" tabindex="0">
+                    <button class="menu-btn">首页 ▼</button>
+                    <div class="submenu">
+                        <a href="Register.html">注册</a>
+                        <a href="Login.html">登录</a>
+                    </div>
+                </div>
+                <div class="menu-item" tabindex="0">
+                    <button class="menu-btn">后台用户管理 ▼</button>
+                    <div class="submenu">
+                        <a href="Admin.html">后台用户管理</a>
+                        <a href="Changepassword.html">密码管理</a>
+                    </div>
+                </div>
+                <div class="menu-item" tabindex="0">
+                    <button class="menu-btn">自然保护区展示 ▼</button>
+                    <div class="submenu">
+                        <a href="Navigation.html">自然保护区展示</a>
+                    </div>
+                </div>
+                <div class="menu-item" tabindex="0">
+                    <button class="menu-btn">天气查询 ▼</button>
+                    <div class="submenu">
+                        <a href="Weather.html">自然保护区天气查询</a>
+                    </div>
+                </div>
+            </div>
+            <img class="logo" src="Add a subheading.png"  onclick="window.location.href='dt.html'">
+        </nav>
+
+        <main class="map-container">
+            <div id="container"></div>
+            <div id="infoPanel">
+                <h2>天气信息</h2>
+                <div>地点: <span id="locationName"></span></div>
+                <div>气温: <span id="temperature"></span>°C</div>
+                <div>天气: <span id="weather"></span></div>
+                <div>湿度: <span id="humidity"></span>%</div>
+                <div>风速: <span id="windSpeed"></span> m/s</div>
+            </div>
+            <div class="map-controls">
+                <button class="control-btn">+</button>
+                <button class="control-btn">-</button>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://api.map.baidu.com/api?v=3.0&ak=Chxx8mpsvDZrmvqrupmqbNBBmaGRXba2"></script>
+    <script>
+        const apiUrl = 'http://localhost:3000/api';
+        const apiKey = '60bf75faa0d1dc5afa4f6bd8b0d7e4de'; // Replace with your OpenWeatherMap API key
+
+        // Load logged-in user data
+        function loadUserData() {
+            const user = JSON.parse(localStorage.getItem('loggedInUser'));
+            if (user) {
+                document.getElementById('username').textContent = user.username;
+                document.getElementById('user-avatar').src = user.avatar || 'default-avatar.png';
+            }
+        }
+
+        // Update avatar across tabs
+        window.addEventListener('storage', () => {
+            loadUserData();
+        });
+
+        // Handle avatar upload
+        const avatarInput = document.getElementById('avatar-input');
+        const userAvatar = document.getElementById('user-avatar');
+
+        userAvatar.addEventListener('click', () => {
+            avatarInput.click();
+        });
+
+        avatarInput.addEventListener('change', async () => {
+            const file = avatarInput.files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append('avatar', file);
+
+                try {
+                    const user = JSON.parse(localStorage.getItem('loggedInUser'));
+                    const response = await fetch(`${apiUrl}/users/${user.id}/avatar`, {
+                        method: 'PUT',
+                        body: formData,
+                    });
+
+                    if (response.ok) {
+                        const updatedUser = await response.json();
+                        localStorage.setItem('loggedInUser', JSON.stringify(updatedUser.user));
+                        loadUserData();
+                        alert('头像已更新');
+                    } else {
+                        alert('头像更新失败');
+                    }
+                } catch (error) {
+                    console.error('上传头像时出错:', error);
+                }
+            }
+        });
+
+        // Logout function
+        const logoutButton = document.getElementById('logoutButton');
+        logoutButton.addEventListener('click', () => {
+            localStorage.removeItem('loggedInUser');
+            alert('已登出');
+            window.location.href = 'Login.html';
+        });
+
+        // Initialize map and weather functionality
+        window.onload = function () {
+            loadUserData();
+
+            const map = new BMap.Map('container');
+            const areas = [
+    { name: '九寨沟自然保护区', coordinates: [104.2425, 33.2583] },
+    { name: '卧龙自然保护区', coordinates: [103.4937, 31.0516] },
+    { name: '黄龙自然保护区', coordinates: [103.8281, 32.7544] },
+    { name: '唐家河自然保护区', coordinates: [105.1719, 32.5766] },
+    { name: '米仓山自然保护区', coordinates: [106.3336, 32.6469] },
+    { name: '若尔盖湿地自然保护区', coordinates: [102.9632, 33.5754] },
+    { name: '大熊猫栖息地自然保护区', coordinates: [103.0589, 30.7280] },
+    { name: '贡嘎山自然保护区', coordinates: [101.9484, 29.5824] },
+    { name: '木里雪山自然保护区', coordinates: [101.2806, 28.5456] },
+    { name: '四川峨眉山自然保护区', coordinates: [103.3369, 29.5854] },
+    { name: '凉山州安宁河流域自然保护区', coordinates: [102.2586, 27.8574] },
+    { name: '九龙山自然保护区', coordinates: [101.7342, 28.9708] },
+    { name: '四姑娘山自然保护区', coordinates: [102.9036, 31.0798] },
+    { name: '青城山-都江堰自然保护区', coordinates: [103.6102, 30.8946] },
+    { name: '康定木格措自然保护区', coordinates: [101.9648, 30.0915] },
+    { name: '黑竹沟自然保护区', coordinates: [102.8488, 28.3350] },
+    { name: '峨边彝族自治县自然保护区', coordinates: [103.0962, 29.1753] },
+    { name: '凉山彝族自治州湿地自然保护区', coordinates: [102.2654, 28.0592] },
+    { name: '甘孜州理塘草原自然保护区', coordinates: [100.2687, 30.0500] },
+    { name: '川西高原自然保护区', coordinates: [101.7675, 32.0845] },
+    { name: '雅安雨城自然保护区', coordinates: [103.0375, 29.9806] },
+    { name: '金阳彝族自治县自然保护区', coordinates: [103.2426, 27.7032] },
+    { name: '攀枝花大黑山自然保护区', coordinates: [101.7005, 26.5856] },
+    { name: '泸定磨西自然保护区', coordinates: [102.0914, 29.5677] }
+];
+
+            const points = areas.map(area => new BMap.Point(area.coordinates[0], area.coordinates[1]));
+            map.centerAndZoom(new BMap.Point(104.0668, 30.5720), 10);
+            map.enableScrollWheelZoom(true);
+            map.setViewport(points);
+
+            areas.forEach(area => {
+                const point = new BMap.Point(area.coordinates[0], area.coordinates[1]);
+                const marker = new BMap.Marker(point);
+                map.addOverlay(marker);
+
+                marker.addEventListener('click', () => {
+                    fetchWeather(area.coordinates, area.name);
+                });
+            });
+
+            document.querySelectorAll('.control-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    if (this.textContent === '+') {
+                        map.zoomIn();
+                    } else if (this.textContent === '-') {
+                        map.zoomOut();
+                    }
+                });
+            });
+        };
+
+        // Fetch weather data
+        async function fetchWeather(coordinates, locationName) {
+            const [lng, lat] = coordinates;
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${apiKey}&units=metric&lang=zh_cn`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (response.ok) {
+                    showWeather(locationName, data);
+                } else {
+                    alert(`无法获取天气信息: ${data.message}`);
+                }
+            } catch (error) {
+                console.error('Error fetching weather data:', error);
+                alert('获取天气信息失败，请稍后再试');
+            }
+        }
+
+        // Show weather data
+        function showWeather(locationName, data) {
+            document.getElementById('locationName').textContent = locationName;
+            document.getElementById('temperature').textContent = data.main.temp;
+            document.getElementById('weather').textContent = data.weather[0].description;
+            document.getElementById('humidity').textContent = data.main.humidity;
+            document.getElementById('windSpeed').textContent = data.wind.speed;
+
+            document.getElementById('infoPanel').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理后台</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    #loginContainer, #dashboard {
+      max-width: 400px;
+      margin: auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    #loginContainer h2, #dashboard h1 {
+      text-align: center;
+    }
+
+    input {
+      display: block;
+      width: 100%;
+      padding: 8px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f4f4f4;
+    }
+
+    .actions button {
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="loginContainer">
+    <h2>管理员登录</h2>
+    <form id="loginForm">
+      <label for="password">密码</label>
+      <input type="password" id="password" placeholder="输入密码" required>
+      <button type="submit">登录</button>
+    </form>
+  </div>
+
+  <div id="dashboard" style="display: none;">
+    <h1>管理后台</h1>
+    <button id="logoutButton">退出登录</button>
+    <button id="exportCsvButton" style="margin-top: 10px;">导出用户数据 (CSV)</button>
+    <div>
+      <h2>用户列表</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>用户名</th>
+            <th>角色</th>
+            <th>状态</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="userTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const apiBase = 'http://localhost:3000/api'; // 修改为您的后端 URL
+    const adminPassword = '123456'; // 默认管理员密码
+
+    // 元素
+    const loginContainer = document.getElementById('loginContainer');
+    const dashboard = document.getElementById('dashboard');
+    const loginForm = document.getElementById('loginForm');
+    const userTable = document.getElementById('userTable');
+    const logoutButton = document.getElementById('logoutButton');
+    const exportCsvButton = document.getElementById('exportCsvButton');
+
+    // 获取用户列表
+    async function fetchUsers() {
+      try {
+        const response = await fetch(`${apiBase}/users`);
+        if (!response.ok) throw new Error('获取用户列表失败');
+        const users = await response.json();
+        renderUserTable(users);
+      } catch (error) {
+        console.error(error);
+        alert('加载用户列表时出错');
+      }
+    }
+
+    // 渲染用户表格
+    function renderUserTable(users) {
+      userTable.innerHTML = '';
+      users.forEach(user => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${user.username}</td>
+          <td>${user.role}</td>
+          <td>${user.status}</td>
+          <td class="actions">
+            <button onclick="changeRole('${user._id}')">修改角色</button>
+            <button onclick="toggleStatus('${user._id}', '${user.status}')">${user.status === 'active' ? '禁用' : '启用'}</button>
+            <button onclick="deleteUser('${user._id}')">删除</button>
+          </td>
+        `;
+        userTable.appendChild(row);
+      });
+    }
+
+    // 修改用户角色
+    async function changeRole(userId) {
+      const newRole = prompt('请输入新的角色 (admin, user, guest):');
+      if (!newRole) return;
+      try {
+        const response = await fetch(`${apiBase}/users/${userId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role: newRole }),
+        });
+        if (!response.ok) throw new Error('修改角色失败');
+        alert('角色已更新');
+        fetchUsers();
+      } catch (error) {
+        console.error(error);
+        alert('修改角色时出错');
+      }
+    }
+
+    // 切换用户状态
+    async function toggleStatus(userId, currentStatus) {
+      const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+      try {
+        const response = await fetch(`${apiBase}/users/${userId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus }),
+        });
+        if (!response.ok) throw new Error('修改状态失败');
+        alert('状态已更新');
+        fetchUsers();
+      } catch (error) {
+        console.error(error);
+        alert('修改状态时出错');
+      }
+    }
+
+    // 删除用户
+    async function deleteUser(userId) {
+      if (!confirm('确定要删除该用户吗？')) return;
+      try {
+        const response = await fetch(`${apiBase}/users/${userId}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error('删除用户失败');
+        alert('用户已删除');
+        fetchUsers();
+      } catch (error) {
+        console.error(error);
+        alert('删除用户时出错');
+      }
+    }
+
+    // 导出用户数据为 CSV
+    exportCsvButton.addEventListener('click', async () => {
+      try {
+        const response = await fetch(`${apiBase}/export`);
+        if (!response.ok) throw new Error('导出数据失败');
+        const csvData = await response.text();
+
+        // 创建下载链接
+        const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = '用户数据.csv';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (error) {
+        console.error(error);
+        alert('导出用户数据时出错');
+      }
+    });
+
+    // 登录表单提交
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const password = document.getElementById('password').value;
+
+      if (password === adminPassword) {
+        alert('登录成功');
+        loginContainer.style.display = 'none';
+        dashboard.style.display = 'block';
+        fetchUsers();
+      } else {
+        alert('密码错误，请重试');
+      }
+    });
+
+    // 退出登录
+    logoutButton.addEventListener('click', () => {
+      loginContainer.style.display = 'block';
+      dashboard.style.display = 'none';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>自然保护区展示与气象查询</title>
+  <script src="https://api.map.baidu.com/api?v=3.0&ak=Chxx8mpsvDZrmvqrupmqbNBBmaGRXba2"></script>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      height: 100%;
+      background-color: #f4f4f9;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .main-content {
+      display: flex;
+      flex-grow: 1;
+    }
+
+    .sidebar {
+      width: 200px;
+      background-color: #34495e;
+      color: white;
+      padding: 20px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .menu-section {
+      flex-grow: 1;
+    }
+
+    .menu-item {
+      margin-bottom: 10px;
+      position: relative;
+    }
+
+    .menu-btn {
+      background-color: transparent;
+      color: white;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      padding: 10px;
+    }
+
+    .submenu {
+      display: none;
+      background-color: #2c3e50;
+      padding-left: 20px;
+      margin-top: 5px;
+      border-left: 2px solid #555;
+    }
+
+    .submenu a {
+      color: white;
+      text-decoration: none;
+      display: block;
+      padding: 5px 0;
+    }
+
+    .submenu a:hover {
+      background-color: #555;
+    }
+
+    .menu-item:focus-within .submenu,
+    .menu-item:hover .submenu {
+      display: block;
+    }
+
+    .user-info {
+      margin-bottom: 20px;
+      text-align: center;
+      color: white;
+    }
+
+    .user-info img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    .logout-btn {
+      margin-top: 20px;
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+    }
+
+    .logout-btn:hover {
+      background-color: #c0392b;
+    }
+
+    #avatar-input {
+      display: none;
+    }
+
+    .content {
+      flex-grow: 1;
+      margin-left: 200px;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 30px;
+      color: #2c3e50;
+    }
+
+    #container {
+      width: 100%;
+      height: 500px;
+      margin: 20px 0;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    #search-input {
+      width: 250px;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    #search-button {
+      padding: 10px 20px;
+      cursor: pointer;
+      background-color: #3498db;
+      border: none;
+      color: white;
+      border-radius: 4px;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+
+    #search-button:hover {
+      background-color: #2980b9;
+    }
+
+    #nav-button {
+      padding: 10px 20px;
+      cursor: pointer;
+      background-color: #2ecc71;
+      border: none;
+      color: white;
+      border-radius: 4px;
+      font-size: 16px;
+      display: none;
+      margin-top: 20px;
+      transition: background-color 0.3s;
+    }
+
+    #nav-button:hover {
+      background-color: #27ae60;
+    }
+
+    .button-container {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-content">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <header>
+        <img id="user-avatar" src="default-avatar.png" alt="用户头像" title="点击更换头像">
+        <div class="user-info">
+          <strong id="username">未登录</strong>
+        </div>
+        <button class="logout-btn" id="logoutButton">登出</button>
+      </header>
+      <div class="menu-section">
+        <div class="menu-item">
+          <button class="menu-btn">首页 ▼</button>
+          <div class="submenu">
+            <a href="Register.html">注册</a>
+            <a href="Login.html">登录</a>
+          </div>
+        </div>
+        <div class="menu-item">
+          <button class="menu-btn">后台用户管理 ▼</button>
+          <div class="submenu">
+            <a href="ManageData.html">后台用户管理</a>
+            <a href="Changepassword.html">密码管理</a>
+          </div>
+        </div>
+        <div class="menu-item">
+          <button class="menu-btn">自然保护区展示 ▼</button>
+          <div class="submenu">
+            <a href="Navigation.html">自然保护区展示</a>
+          </div>
+        </div>
+        <div class="menu-item">
+          <button class="menu-btn">天气查询 ▼</button>
+          <div class="submenu">
+            <a href="Weather.html">自然保护区天气查询</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="content">
+      <h1>自然保护区展示与导航</h1>
+      <div class="button-container">
+        <input type="text" id="search-input" placeholder="搜索自然保护区">
+        <button id="search-button">搜索</button>
+      </div>
+      <div id="container"></div>
+      <div class="button-container">
+        <button id="nav-button">导航到这个保护区</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+ const areas = [
+    { name: '九寨沟自然保护区', level: '国家级', type: '自然生态保护', area: 720, year: 1978, department: '林业部门', coordinates: [104.2425, 33.2583], protectedAnimals: ['大熊猫', '金丝猴'], protectedPlants: ['黄花菜', '松杉'] },
+    { name: '卧龙自然保护区', level: '国家级', type: '森林生态系统保护', area: 2000, year: 1963, department: '林业部门', coordinates: [103.4937, 31.0516], protectedAnimals: ['大熊猫', '羚牛'], protectedPlants: ['珙桐', '红豆杉'] },
+    { name: '黄龙自然保护区', level: '国家级', type: '地貌和生物多样性保护', area: 700, year: 1982, department: '林业部门', coordinates: [103.8281, 32.7544], protectedAnimals: ['雪豹', '川金丝猴'], protectedPlants: ['紫荆', '杜鹃花'] },
+    { name: '唐家河自然保护区', level: '国家级', type: '森林生态系统保护', area: 400, year: 1978, department: '林业部门', coordinates: [105.1719, 32.5766], protectedAnimals: ['羚牛', '小熊猫'], protectedPlants: ['银杏', '珙桐'] },
+    { name: '米仓山自然保护区', level: '国家级', type: '森林和水源保护', area: 350, year: 1988, department: '林业部门', coordinates: [106.3336, 32.6469], protectedAnimals: ['金雕', '白鹳'], protectedPlants: ['铁线蕨', '木兰'] },
+    { name: '若尔盖湿地自然保护区', level: '国家级', type: '湿地生态保护', area: 1000, year: 1994, department: '林业部门', coordinates: [102.9632, 33.5754], protectedAnimals: ['黑颈鹤', '斑头雁'], protectedPlants: ['香蒲', '苔草'] },
+    { name: '大熊猫栖息地自然保护区', level: '国家级', type: '动物栖息地保护', area: 1800, year: 2006, department: '林业部门', coordinates: [103.0589, 30.7280], protectedAnimals: ['大熊猫', '红腹角雉'], protectedPlants: ['银杏', '珙桐'] },
+    { name: '贡嘎山自然保护区', level: '国家级', type: '高山生态系统保护', area: 4000, year: 1995, department: '林业部门', coordinates: [101.9484, 29.5824], protectedAnimals: ['雪豹', '岩羊'], protectedPlants: ['雪莲', '冷杉'] },
+    { name: '木里雪山自然保护区', level: '国家级', type: '高山生态系统保护', area: 3200, year: 2001, department: '林业部门', coordinates: [101.2806, 28.5456], protectedAnimals: ['白唇鹿', '藏羚羊'], protectedPlants: ['红景天', '雪松'] },
+    { name: '四川峨眉山自然保护区', level: '国家级', type: '森林和文化生态保护', area: 154, year: 1982, department: '林业部门', coordinates: [103.3369, 29.5854], protectedAnimals: ['小熊猫', '猕猴'], protectedPlants: ['峨眉冷杉', '杜鹃花'] },
+    { name: '凉山州安宁河流域自然保护区', level: '国家级', type: '水源和湿地保护', area: 600, year: 1997, department: '水利部门', coordinates: [102.2586, 27.8574], protectedAnimals: ['黑颈鹤', '水獭'], protectedPlants: ['水葱', '芦苇'] },
+    { name: '九龙山自然保护区', level: '国家级', type: '森林生态保护', area: 150, year: 1990, department: '林业部门', coordinates: [101.7342, 28.9708], protectedAnimals: ['斑羚', '金雕'], protectedPlants: ['青杄', '高山杜鹃'] },
+    { name: '四姑娘山自然保护区', level: '国家级', type: '高山生态系统保护', area: 1000, year: 1982, department: '林业部门', coordinates: [102.9036, 31.0798], protectedAnimals: ['雪豹', '白唇鹿'], protectedPlants: ['高山栎', '红豆杉'] },
+    { name: '青城山-都江堰自然保护区', level: '国家级', type: '森林和文化生态保护', area: 300, year: 1982, department: '林业部门', coordinates: [103.6102, 30.8946], protectedAnimals: ['红腹锦鸡', '小熊猫'], protectedPlants: ['桂花', '银杏'] },
+    { name: '康定木格措自然保护区', level: '国家级', type: '湖泊和森林生态保护', area: 350, year: 2000, department: '林业部门', coordinates: [101.9648, 30.0915], protectedAnimals: ['猕猴', '小熊猫'], protectedPlants: ['红杉', '桦木'] },
+    { name: '黑竹沟自然保护区', level: '国家级', type: '森林生态保护', area: 500, year: 1998, department: '林业部门', coordinates: [102.8488, 28.3350], protectedAnimals: ['金丝猴', '大灵猫'], protectedPlants: ['杜鹃花', '冷杉'] },
+    { name: '峨边彝族自治县自然保护区', level: '国家级', type: '森林和民族生态保护', area: 100, year: 2002, department: '林业部门', coordinates: [103.0962, 29.1753], protectedAnimals: ['斑羚', '山鹧鸪'], protectedPlants: ['青杄', '白鹤花'] },
+    { name: '凉山彝族自治州湿地自然保护区', level: '国家级', type: '湿地生态保护', area: 800, year: 2003, department: '水利部门', coordinates: [102.2654, 28.0592], protectedAnimals: ['白鹳', '斑头雁'], protectedPlants: ['芦苇', '苔草'] },
+    { name: '甘孜州理塘草原自然保护区', level: '国家级', type: '草原生态保护', area: 2000, year: 1999, department: '林业部门', coordinates: [100.2687, 30.0500], protectedAnimals: ['藏羚羊', '雪豹'], protectedPlants: ['龙胆', '草苁蓉'] },
+    { name: '川西高原自然保护区', level: '国家级', type: '高原生态保护', area: 5000, year: 2010, department: '林业部门', coordinates: [101.7675, 32.0845], protectedAnimals: ['藏羚羊', '岩羊'], protectedPlants: ['草本植物', '高山灌木'] },
+    { name: '雅安雨城自然保护区', level: '国家级', type: '森林生态保护', area: 450, year: 2005, department: '林业部门', coordinates: [103.0375, 29.9806], protectedAnimals: ['白鹳', '红腹锦鸡'], protectedPlants: ['珙桐', '杜鹃花'] },
+    { name: '金阳彝族自治县自然保护区', level: '国家级', type: '森林生态保护', area: 700, year: 2008, department: '林业部门', coordinates: [103.2426, 27.7032], protectedAnimals: ['羚牛', '小熊猫'], protectedPlants: ['红杉', '松树'] },
+    { name: '攀枝花大黑山自然保护区', level: '国家级', type: '森林和生物多样性保护', area: 600, year: 1995, department: '林业部门', coordinates: [101.7005, 26.5856], protectedAnimals: ['猕猴', '山羚'], protectedPlants: ['松树', '杜鹃花'] },
+    { name: '泸定磨西自然保护区', level: '国家级', type: '森林和湿地保护', area: 300, year: 1992, department: '林业部门', coordinates: [102.0914, 29.5677], protectedAnimals: ['红腹锦鸡', '白鹳'], protectedPlants: ['红杉', '冷杉'] }
+];
+
+
+    let selectedArea = null;
+
+    const map = new BMap.Map('container');
+    map.centerAndZoom(new BMap.Point(104.0668, 30.5720), 10);
+    map.enableScrollWheelZoom(true);
+
+    function populateMap(areas) {
+      map.clearOverlays();
+      areas.forEach(area => {
+        const point = new BMap.Point(area.coordinates[0], area.coordinates[1]);
+        const marker = new BMap.Marker(point);
+        map.addOverlay(marker);
+
+        marker.addEventListener('click', () => {
+          map.centerAndZoom(point, 14);
+          const infoWindow = new BMap.InfoWindow(`
+            <b>${area.name}</b><br>
+            <strong>级别:</strong> ${area.level}<br>
+            <strong>类型:</strong> ${area.type}<br>
+            <strong>面积:</strong> ${area.area} km²<br>
+            <strong>成立年份:</strong> ${area.year}<br>
+            <strong>管理部门:</strong> ${area.department}<br>
+            <strong>保护动物:</strong> ${area.protectedAnimals.join(', ')}<br>
+            <strong>保护植物:</strong> ${area.protectedPlants.join(', ')}
+          `);
+          map.openInfoWindow(infoWindow, point);
+          selectedArea = area;
+          document.getElementById('nav-button').style.display = 'block';
+        });
+      });
+    }
+
+    function loadUserData() {
+      const user = JSON.parse(localStorage.getItem('loggedInUser'));
+      if (user) {
+        document.getElementById('username').textContent = user.username;
+        document.getElementById('user-avatar').src = user.avatar || 'default-avatar.png';
+      } else {
+        alert('您尚未登录，请先登录！');
+        window.location.href = 'Login.html'; // Redirect to login page
+      }
+    }
+
+    document.getElementById('logoutButton').addEventListener('click', () => {
+      localStorage.removeItem('loggedInUser');
+      alert('已登出');
+      window.location.href = 'Login.html'; // Redirect to login page
+    });
+
+    document.getElementById('search-button').addEventListener('click', () => {
+      const searchTerm = document.getElementById('search-input').value.trim().toLowerCase();
+      const filteredAreas = areas.filter(area => area.name.toLowerCase().includes(searchTerm));
+
+      if (filteredAreas.length > 0) {
+        alert(`找到 ${filteredAreas.length} 个匹配保护区`);
+        populateMap(filteredAreas);
+        const firstResult = filteredAreas[0];
+        const point = new BMap.Point(firstResult.coordinates[0], firstResult.coordinates[1]);
+        map.centerAndZoom(point, 14);
+      } else {
+        alert('未找到相关保护区');
+        map.clearOverlays();
+      }
+    });
+
+    document.getElementById('nav-button').addEventListener('click', () => {
+      if (selectedArea) {
+        const geolocation = new BMap.Geolocation();
+        geolocation.getCurrentPosition(r => {
+          if (geolocation.getStatus() === BMAP_STATUS_SUCCESS) {
+            const startPoint = r.point;
+            const endPoint = new BMap.Point(selectedArea.coordinates[0], selectedArea.coordinates[1]);
+            const driving = new BMap.DrivingRoute(map, { renderOptions: { map } });
+            driving.search(startPoint, endPoint);
+          } else {
+            alert('无法获取当前位置');
+          }
+        });
+      }
+    });
+
+    window.onload = () => {
+      loadUserData();
+      populateMap(areas);
+    };
+  </script>
+</body>
+</html>

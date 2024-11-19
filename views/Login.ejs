@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>登录 - 用户管理</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    form {
+      max-width: 400px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .error-message {
+      color: red;
+      font-size: 12px;
+      margin: -10px 0 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>登录</h1>
+  <form id="loginForm">
+    <label for="username">用户名</label>
+    <input type="text" id="username" name="username" placeholder="请输入用户名" required>
+    <span id="usernameError" class="error-message"></span>
+
+    <label for="password">密码</label>
+    <input type="password" id="password" name="password" placeholder="请输入密码" required>
+    <span id="passwordError" class="error-message"></span>
+
+    <button type="submit">登录</button>
+  </form>
+
+  <script>
+    const loginForm = document.getElementById('loginForm');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      try {
+        const response = await fetch('http://localhost:3000/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert('登录成功');
+
+          // Save user data to localStorage
+          localStorage.setItem('loggedInUser', JSON.stringify(result.user));
+
+          // Redirect to homepage
+          window.location.href = 'dt.html';
+        } else {
+          alert('登录失败: ' + result.message);
+        }
+      } catch (err) {
+        alert('登录时发生错误');
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>
