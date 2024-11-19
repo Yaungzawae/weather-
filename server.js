@@ -232,8 +232,8 @@ app.get("/dt.html", (req, res)=>{
 app.get("/Login.html", (req, res)=>{
   return res.render("Login")
 } )
-app.get("/Register.html", (req, res)=>{
-  return res.render("Register")
+app.get("/register.html", (req, res)=>{
+  return res.render("register")
 } )
 
 app.get("/Navigation.html", (req, res)=>{
